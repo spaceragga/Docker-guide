@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: stage3-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  api:
+    build: ./api
+    image: stage3-node-api:latest
+    container_name: stage3-node-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./api/env.example
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    image: stage3-web:latest
+    container_name: stage3-web
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./web/env.example
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+
+
