@@ -1,0 +1,21 @@
+{
+  "name": "stage2-node-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Stage 2: Node.js API + MongoDB (multi-container)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node scripts/seed.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "helmet": "^7.0.0",
+    "mongodb": "^6.8.0"
+  },
+  "license": "MIT"
+}
