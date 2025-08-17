@@ -1,0 +1,35 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+.pnpm-store/
+
+# Env files
+.env
+.env.*
+env.local
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+.history/
+
+# Logs & coverage
+logs/
+*.log
+coverage/
+
+# Docker
+*.pid
+docker-data/
+# **/.dockerignore
+
+# Build artifacts
+dist/
+build/
+.next/
+out/
+
+
