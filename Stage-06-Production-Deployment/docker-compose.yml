@@ -1,0 +1,99 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: stage6-mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  api:
+    build: ./api
+    image: stage6-node-api:latest
+    container_name: stage6-node-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./api/env.example
+    environment:
+      - NODE_ENV=production
+      - APP_SECRET_FILE=/run/secrets/app_secret
+    secrets:
+      - app_secret
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthcheck.js"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+      - edge
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+
+  web:
+    build: ./web
+    image: stage6-web:latest
+    container_name: stage6-web
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./web/env.example
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - api
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - edge
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+
+networks:
+  internal:
+    internal: true
+  edge:
+    driver: bridge
+
+volumes:
+  mongo_data:
+
+secrets:
+  app_secret:
+    file: ./secrets/app_secret.txt
+
+
